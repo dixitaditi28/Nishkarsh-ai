@@ -129,11 +129,11 @@ The CFPB dataset provides 2M+ real complaint narratives — the largest publicly
 ### Prerequisites
 - Python 3.11 (Anaconda recommended)
 - NVIDIA GPU with CUDA 12.x (or CPU, slower)
-- 10GB+ free disk space (preferably on non-OS drive)
+
 
 ### Step 1: Clone the repository
 ```bash
-git clone https://github.com/yourusername/nishkarsh-ai.git
+git clone https://github.com/dixitaditi28/nishkarsh-ai.git
 cd nishkarsh-ai
 ```
 
@@ -176,7 +176,7 @@ jupyter notebook notebooks/01_data_exploration.ipynb
 
 ---
 
-## 📈 Current Progress (Day 1)
+## 📈 Current Progress (Phase 1)
 
 - [x] Project structure created
 - [x] Conda environment configured (D: drive, Python 3.11)
@@ -185,19 +185,19 @@ jupyter notebook notebooks/01_data_exploration.ipynb
 - [x] EDA completed — all columns explored, nulls checked
 - [x] Category mapping: 20 CFPB labels → 8 RBI categories (+ Others)
 - [x] Training-ready dataset saved: `data/processed/complaints_mapped.csv`
-- [ ] DistilBERT tokenization (Day 1, Steps 6–10)
+- [ ] DistilBERT tokenization (Phase 1, Steps 6–10)
 - [ ] Model fine-tuning
-- [ ] Regression & outcome heads (Day 2)
-- [ ] Whisper ASR integration (Day 2)
-- [ ] FastAPI backend (Day 3)
-- [ ] Streamlit dashboard (Day 4)
-- [ ] AWS deployment (Day 4)
+- [ ] Regression & outcome heads (Phase 2)
+- [ ] Whisper ASR integration (Phase 2)
+- [ ] FastAPI backend (Phase 3)
+- [ ] Streamlit dashboard (Phase 4)
+- [ ] AWS deployment (Phase 4)
 
 ---
 
 ## 👨‍💻 Developer
 
-**Dixit** | Built with VS Code on Windows 11 | Lenovo IdeaPad Gaming (RTX 3050)
+**Dixit** | 
 
 ---
 
@@ -207,4 +207,4 @@ See [`DOCUMENTATION.md`](DOCUMENTATION.md) for a detailed step-by-step log of ev
 
 ---
 
-> **🚧 Work in Progress** — This project is being built over 4 days. Check back for updates.
+> **🚧 Work in Progress** — This project is being built over 4 Phases. Check back for updates.
