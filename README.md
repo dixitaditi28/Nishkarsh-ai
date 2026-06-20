@@ -9,7 +9,7 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.5.1%20CUDA-red)](https://pytorch.org)
 [![License](https://img.shields.io/badge/License-MIT-lightgrey)](LICENSE)
 
-*Nishkarsh (Sanskrit: निष्कर्ष) — Conclusion / Outcome*
+
 
 </div>
 
