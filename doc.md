@@ -49,56 +49,18 @@ A complaint intelligence pipeline that takes raw unstructured complaint text as 
 
 ---
 
-## 2. Name Decision
-
-Two names were considered:
-
-| | Nishkarsh AI ✅ | FinGuard AI ❌ |
-|---|---|---|
-| **Origin** | Sanskrit (निष्कर्ष) — means conclusion/outcome | English portmanteau |
-| **Relevance** | Directly maps to the core function: predicting outcomes | Sounds like a generic security product |
-| **Uniqueness** | Distinctive; not used in the fintech space | Dozens of tools use the Fin+Guard pattern |
-| **Context fit** | Works naturally in Indian regulatory context | Could be from any country |
-
-**Decision:** Nishkarsh AI. The name is memorable precisely because it is not English, it is culturally grounded, and it describes the product's purpose exactly — predicting conclusions/outcomes of complaints.
-
----
-
-## 3. System Specifications
-
-| Component | Detail |
-|-----------|--------|
-| Machine | Lenovo IdeaPad Gaming Laptop |
-| OS | Windows 11 |
-| Terminal | PowerShell (in VS Code) |
-| GPU | NVIDIA GeForce RTX 3050 Laptop GPU |
-| VRAM | 4096 MB (4GB) |
-| CUDA Version | 12.5 (driver) |
-| CPU | Intel (with integrated Intel Iris Xe graphics) |
-| Python | 3.11 via Anaconda |
-| IDE | Visual Studio Code |
-| Conda Env Location | D:\conda-envs\nishkarsh |
-| PyTorch Build | cu121 (CUDA 12.1 — compatible with 12.5 driver) |
-
-**Important note on drive layout:**
-- C: drive had only 2.09GB free — not enough for PyTorch (~3GB)
-- D: drive had 244GB free
-- Conda environments and package cache were moved to D: permanently (see Hurdles section)
-
----
-
-## 4. Four-Day Roadmap
+## 4. Four Phase Roadmap
 
 The project is structured into 4 focused build days:
 
-### Day 1 — Data Pipeline & ML Foundations
+### Phase 1 — Data Pipeline & ML Foundations
 - Download and explore the CFPB consumer complaint dataset
 - Map US product categories to 15 RBI Ombudsman categories
 - Tokenise complaint text using DistilBERT tokenizer
 - Fine-tune DistilBERT for multi-label classification
 - Target: 92%+ accuracy baseline
 
-### Day 2 — Regression Heads, Outcome Model & Voice
+### Phase 2 — Regression Heads, Outcome Model & Voice
 - Add regression head on top of DistilBERT for resolution time prediction (target MAE ≤2 days)
 - Train binary classifier for outcome prediction (favour / not in favour)
 - Integrate OpenAI Whisper ASR for Hindi + English voice complaints
@@ -106,14 +68,14 @@ The project is structured into 4 focused build days:
 - Gemini API summarizer: raw complaint → structured officer brief
 - Generate synthetic Indian complaint narratives for domain adaptation
 
-### Day 3 — FastAPI Backend & PostgreSQL
+### Phase 3 — FastAPI Backend & PostgreSQL
 - Design complaint schema in PostgreSQL
 - Build REST API endpoints: POST /complaint, GET /queue, GET /stats
 - Serve all models via API
 - Implement urgency scoring logic (1–10)
 - Dockerise the entire stack
 
-### Day 4 — Streamlit Dashboard & AWS Deployment
+### Phase 4 — Streamlit Dashboard & AWS Deployment
 - Build officer-facing Streamlit dashboard
 - Urgency heatmap, week-over-week trend charts, exportable reports
 - Deploy Docker containers to AWS EC2
@@ -122,7 +84,7 @@ The project is structured into 4 focused build days:
 
 ---
 
-## 5. Day 1 — Detailed Step Log
+## 5. Phase 1 — Detailed Step Log
 
 ### Step 1: Project Folder Structure
 
@@ -145,9 +107,6 @@ code .
 - `src/` — production Python scripts (later: FastAPI, utilities, mapping)
 
 Separating raw from processed data is a best practice: if anything goes wrong during processing, the original file is always intact.
-
-**Hurdle encountered:**
-The bash command `mkdir data notebooks models src` does not work in PowerShell. PowerShell's `mkdir` only accepts multiple folders via comma-separated syntax: `mkdir data, notebooks, models, src`.
 
 **Resolution:** Used PowerShell-correct syntax with commas.
 
@@ -197,18 +156,6 @@ python -c "import torch; print(torch.cuda.is_available()); print(torch.cuda.get_
 **PyTorch version installed:** 2.5.1+cu121
 **CUDA note:** PyTorch cu121 build is compatible with CUDA 12.5 driver (CUDA is backward compatible — a 12.5 driver can run 12.1 builds)
 
-**Hurdle encountered:**
-First install attempt failed with `[Errno 28] No space left on device` — C: drive had only 2.09GB free and PyTorch requires ~3GB.
-
-**Resolution:** Moved conda environments and package cache to D: (244GB free). Deleted the broken environment, recreated it on D:, and reinstalled all packages successfully.
-
-**Verification of D: placement:**
-```powershell
-conda info --envs
-# Output: nishkarsh  *  D:\conda-envs\nishkarsh  ← confirmed on D:
-```
-
----
 
 ### Step 3: Dataset Download
 
@@ -281,11 +228,6 @@ print(df.isnull().sum())
 - `Sub-product`: 52,206 missing (irrelevant)
 
 **Key finding:** Zero missing values in our two critical columns. No filtering needed.
-
-**Hurdle encountered:**
-`df.isnull.sum()` threw `AttributeError: 'function' object has no attribute 'sum'`. The parentheses were missing — `isnull` is a method and must be called as `isnull()` before chaining `.sum()`.
-
-**Resolution:** Corrected to `df.isnull().sum()`.
 
 **Cell 3 — Category distribution:**
 ```python
@@ -382,69 +324,6 @@ df_clean[['text', 'rbi_category']].to_csv('../data/processed/complaints_mapped.c
 **Columns:** `text` (complaint narrative), `rbi_category` (RBI Ombudsman category)
 
 This file is the direct input to the DistilBERT tokenizer in Steps 6–10.
-
----
-
-## 6. Hurdles & Resolutions
-
-### Hurdle 1 — PowerShell mkdir syntax
-**What happened:** Running `mkdir data notebooks models src` in PowerShell threw `ParameterBindingException: A positional parameter cannot be found that accepts argument 'notebooks'`. PowerShell's mkdir does not accept multiple space-separated arguments.
-
-**Resolution:** Used PowerShell comma-separated syntax: `mkdir data, notebooks, models, src, data\raw, data\processed`
-
-**Learning:** PowerShell and bash have different syntax for the same operations. Throughout this project, bash commands from tutorials must be adapted for PowerShell.
-
----
-
-### Hurdle 2 — Accidentally pasting terminal prompt
-**What happened:** The text `PS C:\Users\dixit\nishkarsh-ai>` was accidentally copied and pasted into the terminal. PowerShell attempted to run it as a process name and threw `NoProcessFoundForGivenName`.
-
-**Resolution:** The prompt text is display-only — it shows your current location. Only the command text that comes after the `>` symbol should be typed or pasted.
-
----
-
-### Hurdle 3 — Python version selection
-**What happened:** The machine had Python 3.11 and 3.14 installed. Original instructions said Python 3.10, causing confusion.
-
-**Resolution:** Chose Python 3.11. Reasoning: 3.14 is too new (no official PyTorch/Transformers wheels), 3.10 is unnecessary when 3.11 is available and fully supported. 3.11 has the widest ML library compatibility as of June 2026.
-
----
-
-### Hurdle 4 — Disk space error during PyTorch install
-**What happened:** `pip install torch` failed mid-install with `[Errno 28] No space left on device`. C: drive had only 2.09GB free; PyTorch requires ~3GB.
-
-**Resolution:**
-1. Ran `Get-PSDrive C` and `Get-PSDrive D` to check both drives
-2. D: had 244GB free
-3. Moved conda environments and package cache to D: permanently:
-   ```powershell
-   conda config --add envs_dirs D:\conda-envs
-   conda config --add pkgs_dirs D:\conda-pkgs
-   ```
-4. Deleted the broken environment: `conda env remove -n nishkarsh`
-5. Recreated on D: and reinstalled all packages successfully
-
----
-
-### Hurdle 5 — Kaggle token as link, not JSON
-**What happened:** Kaggle's new "API Tokens" section generates a token displayed as a link, not a downloadable file. Running `kaggle datasets download` threw an authentication error.
-
-**Resolution:** Used the "Legacy API Credentials" section on kaggle.com/settings/api → "Create Legacy API Key" button → this downloads `kaggle.json` directly. Placed at `C:\Users\dixit\.kaggle\kaggle.json`.
-
----
-
-### Hurdle 6 — isnull() syntax error
-**What happened:** `df.isnull.sum()` threw `AttributeError: 'function' object has no attribute 'sum'`. Written without the calling parentheses.
-
-**Resolution:** `df.isnull().sum()` — `isnull` is a method and must be called with `()` before chaining `.sum()`.
-
----
-
-### Hurdle 7 — Trying to open 2.5GB CSV in Excel
-**What happened:** Windows associated the `.csv` file with Excel and attempted to open it. Excel crashed / couldn't handle 2M rows.
-
-**Resolution:** The file is not meant to be opened in Excel. pandas loads it into memory efficiently using chunked reading internally. Always load large CSVs through Python/pandas, never through spreadsheet software.
-
 ---
 
 ## 7. Tool Decisions — Why Each Was Chosen
@@ -590,7 +469,7 @@ nishkarsh-ai/
     └── category_mapping.py            # CFPB → RBI mapping dictionary + helper function
 ```
 
-### Next steps (Day 1, Steps 6–10)
+### Next steps 
 1. **Step 6** — Encode RBI category labels as integers (label encoding)
 2. **Step 7** — Tokenise text using DistilBERT tokenizer (truncate to 512 tokens)
 3. **Step 8** — Sample training subset (50k–100k rows — full 2M is too large for 4GB VRAM in one session)
@@ -599,4 +478,4 @@ nishkarsh-ai/
 
 ---
 
-*Document last updated: 20 June 2026 | Day 1 of 4 complete*
+*Document last updated: 20 June 2026 | Phase 1 of 4 complete*
