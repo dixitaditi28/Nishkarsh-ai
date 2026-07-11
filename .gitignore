@@ -6,3 +6,6 @@ __pycache__/
 .ipynb_checkpoints/
 *.pyc
 models/
+
+*doc.md
+doc.md 
